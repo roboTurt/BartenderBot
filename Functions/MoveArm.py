@@ -111,57 +111,58 @@ class MoveArm():
         orientationAngle = processedImage[4]
         color = processedImage[1]
         
-
+        if color is "None":
+            
+            self.initMove()
+        
         # print(orientationAngle)
         # print(color)
 
+        else:
 
-        previous_target_coords = [self.last_target_world_X, self.last_target_world_Y]
-        current_target_coords = [targetX, targetY]
+            previous_target_coords = [self.last_target_world_X, self.last_target_world_Y]
+            current_target_coords = [targetX, targetY]
 
-        # if None not in previous_target_coords:
-        #     previous_target_coords = [round(num, 1) for num in previous_target_coords]
-        if None not in current_target_coords and color is not "None":
-            current_target_coords = [round(num, 1) for num in current_target_coords]
+            # if None not in previous_target_coords:
+            #     previous_target_coords = [round(num, 1) for num in previous_target_coords]
+            if None not in current_target_coords:
+                current_target_coords = [round(num, 1) for num in current_target_coords]
 
-            print(targetX)
-            print(" ")
-            print(targetY)
-            self.capture_block_location_and_color(targetX, targetY, color)
-            self.openGripper()
-            
-            result = self.move_endEffector_to_target(targetX, targetY)
-            #print(result)
-            if result is not False:
-
-                target_orient_angle = self.match_endEffector_angle_to_block(targetX, targetY, orientationAngle)
-                time.sleep(0.2)
-                self.rotate_endEffector_by_angle(target_orient_angle)
-                time.sleep(0.2)
-                self.adjust_endEffector_Z_height(1.5) #lower claw to block 
-                time.sleep(0.2)
-                self.closeGripper()
-                time.sleep(0.2)
-                self.adjust_endEffector_Z_height(12) #raise claw 
-                time.sleep(0.2)
-                target_home_position_X = self.coordinate[color][0]
-                target_home_position_Y = self.coordinate[color][1]
-                self.move_endEffector_to_target(target_home_position_X, target_home_position_Y)
-                time.sleep(2.2)
-                self.adjust_endEffector_Z_height(1.5) #lower claw to block 
-                time.sleep(0.2)
+                print(targetX)
+                print(" ")
+                print(targetY)
+                self.capture_block_location_and_color(targetX, targetY, color)
                 self.openGripper()
-                time.sleep(0.2)
-           
-            else:
-                self.initMove()
-                time.sleep(5)
+                
+                result = self.move_endEffector_to_target(targetX, targetY)
+                #print(result)
+                if result is not False:
 
-                #time.sleep(2)
-        else: 
+                    target_orient_angle = self.match_endEffector_angle_to_block(targetX, targetY, orientationAngle)
+                    time.sleep(0.2)
+                    self.rotate_endEffector_by_angle(target_orient_angle)
+                    time.sleep(0.2)
+                    self.adjust_endEffector_Z_height(1.5) #lower claw to block 
+                    time.sleep(0.2)
+                    self.closeGripper()
+                    time.sleep(0.2)
+                    self.adjust_endEffector_Z_height(12) #raise claw 
+                    time.sleep(0.2)
+                    target_home_position_X = self.coordinate[color][0]
+                    target_home_position_Y = self.coordinate[color][1]
+                    self.move_endEffector_to_target(target_home_position_X, target_home_position_Y)
+                    time.sleep(2.2)
+                    self.adjust_endEffector_Z_height(1.5) #lower claw to block 
+                    time.sleep(0.2)
+                    self.openGripper()
+                    time.sleep(0.2)
+            
+                else:
+                    self.initMove()
+                    time.sleep(5)
 
-            self.initMove()
-            time.sleep(2)
+                    #time.sleep(2)
+
         
 
             

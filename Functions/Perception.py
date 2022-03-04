@@ -293,67 +293,10 @@ class Perception():
                 detectedColor, rgbValue = self.returnDetectedColor(averageColorValue)
             
             else:
-<<<<<<< HEAD
-            
-                self.colorList.append(0)
-        
-            if distance < 0.5:
-                self.count += 1
-                self.listOfBlockCenterCoords.extend((self.block_worldX_coord, self.block_worldY_coord))
-                if self.t1_Counter_Started:
-                    self.t1_Counter_Started = False
-                    self.t1 = time.time()
-                if time.time() - self.t1 > 0.5:
-                    self.rotation_angle = boundingRect[2]
-                    self.t1_Counter_Started = True
-                    self.block_worldX_coord, self.block_worldY_coord = np.mean(np.array(self.listOfBlockCenterCoords).reshape(self.count, 2), axis=0)
-                    self.listOfBlockCenterCoords.clear()
-                    self.count = 0
-                    self.start_pick_up = True
-
-            else: 
-                self.t1 = time.time()
-                self.t1_Counter_Started = True
-                self.listOfBlockCenterCoords.clear()
-                self.count = 0
-            #track = True
-            #print(count,distance)
-            # 累计判断
-            # if action_finish:
-            #     if distance < 0.3:
-            #         center_list.extend((world_x, world_y))
-            #         count += 1
-            #         if t1_Counter_Started:
-            #             t1_Counter_Started = False
-            #             t1 = time.time()
-            #         if time.time() - t1 > 1.5:
-            #             rotation_angle = rect[2]
-            #             t1_Counter_Started = True
-            #             world_X, world_Y = np.mean(np.array(center_list).reshape(count, 2), axis=0)
-            #             count = 0
-            #             center_list = []
-            #             start_pick_up = True
-            #     else:
-            #         t1 = time.time()
-            #         t1_Counter_Started = True
-            #         count = 0
-            #         center_list = []
-
-            averageColorValue = int(round(np.mean(np.array(self.colorList))))
-            
-            detectedColor, rgbValue = self.returnDetectedColor(averageColorValue)
-           
-        else:
-
-        #     if not self.start_pick_up:
-        #         rgbValue = (0, 0, 0)
-            detectedColor = "None"
-=======
 
                 #if not self.start_pick_up:
                 rgbValue = (0, 0, 0)
                 detectedColor = "None"
->>>>>>> f85c39923025a9fd544b7c67e1c7c104ffaf133f
 
             # if move_square:
                 
