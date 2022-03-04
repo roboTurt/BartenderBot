@@ -102,14 +102,14 @@ class MoveArm():
             
                                     -90, -90, 0, 1000)
    
-    def pickAndPlace(self, processedImage):
+    def pickAndPlace(self, targetX, targetY, orientationAngle, color):
         
         #print(len(processedImage))
 
-        targetX = processedImage[2]
-        targetY = processedImage[3]
-        orientationAngle = processedImage[4]
-        color = processedImage[1]
+        # targetX = processedImage[2]
+        # targetY = processedImage[3]
+        # orientationAngle = processedImage[4]
+        # color = processedImage[1]
         
         if color is "None":
             

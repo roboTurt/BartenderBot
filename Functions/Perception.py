@@ -307,15 +307,15 @@ class Perception():
             # cv2.imshow('Frame', self.image)
             # cv2.waitkey()
             #print([self.image, detectedColor, self.block_worldX_coord, self.block_worldY_coord, self.rotation_angle])
-            return [self.image, detectedColor, self.block_worldX_coord, self.block_worldY_coord, self.rotation_angle]
+            return (self.image, detectedColor, self.block_worldX_coord, self.block_worldY_coord, self.rotation_angle)
         
         else:
 
-            return [self.image,None,None,None,None]
+            return (self.image,None,None,None,None)
     
 
     def drawImageCV2(self,image):
-        print(image[1])
-        if image[0] is not None:
-            cv2.imshow('Frame',image[0])
+
+        if image is not None:
+            cv2.imshow('Frame',image)
             cv2.waitKey(1)

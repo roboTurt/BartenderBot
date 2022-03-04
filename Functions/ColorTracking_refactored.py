@@ -85,11 +85,11 @@ if __name__ == '__main__':
 
     runCV_on_processed_camera_frames_service = ConsumerProducer(id_blocks.detectObject,
                                                                 input_busses = smoothed_camera_image_bus,
-                                                                output_busses = processed_camera_image_bus, 
-                                                                                # detected_color_bus, 
-                                                                                # world_X_target_coord_bus, 
-                                                                                # world_Y_target_coord_bus, 
-                                                                                # object_orientation_bus),
+                                                                output_busses = (processed_camera_image_bus, 
+                                                                                detected_color_bus, 
+                                                                                world_X_target_coord_bus, 
+                                                                                world_Y_target_coord_bus, 
+                                                                                object_orientation_bus),
                                                                 delay = 1,
                                                                 termination_busses = termination_bus,
                                                                 name = "do CV object detection on processed frames")
@@ -102,12 +102,10 @@ if __name__ == '__main__':
                                     name = "read raw camera images")
 
     pick_and_place_service = ConsumerProducer(arm_IK.pickAndPlace,
-                                            input_busses = processed_camera_image_bus,
-                                                            
-                                                            # world_X_target_coord_bus, 
-                                                            # world_Y_target_coord_bus,
-                                                            # object_orientation_bus, 
-                                                            # detected_color_bus),
+                                            input_busses = (world_X_target_coord_bus, 
+                                                            world_Y_target_coord_bus,
+                                                            object_orientation_bus, 
+                                                            detected_color_bus),
                                             output_busses = pickAndPlace_status_bus, 
                                             delay = 1,
                                             termination_busses = termination_bus,
