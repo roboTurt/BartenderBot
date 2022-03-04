@@ -12,9 +12,13 @@ fig = plt.figure()
 nx = 2  
 ny = 2
 #draw markers
+plt.subplots_adjust( 
+                    wspace=0.5, 
+                    hspace=0.9)
+
 for i in range(1, nx*ny+1):
     ax = fig.add_subplot(ny,nx, i)
-    img = aruco.drawMarker(aruco_dict,i, 700)
+    img = aruco.drawMarker(aruco_dict,i, 220,10)
     plt.imshow(img, cmap = mpl.cm.gray, interpolation = "nearest")
     ax.axis("off")
 
