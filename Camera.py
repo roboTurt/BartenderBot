@@ -52,6 +52,10 @@ class Camera:
         except Exception as e:
             print('关闭摄像头失败:', e)
 
+    def get_camera_frame(self):
+        #print("frame")
+        return self.frame
+
     def camera_task(self):
         while True:
             try:

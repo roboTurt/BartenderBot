@@ -3,10 +3,7 @@
 import sys
 import os
 
-
-
 sys.path.append(os.path.dirname(os.getcwd()))
-#sys.path.append('/home/pi/ArmPi/')
 
 from MoveArm import MoveArm
 import cv2

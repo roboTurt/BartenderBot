@@ -43,8 +43,8 @@ for fname in images:
         # Draw and display the corners
         img = cv2.drawChessboardCorners(img, CHECKERBOARD, corners2, ret)
     
-    #cv2.imshow('img',img)
-    #cv2.waitKey(0)              
+    cv2.imshow('img',img)
+    cv2.waitKey(0)              
 
 cv2.destroyAllWindows()
 
@@ -58,11 +58,26 @@ detected corners (imgpoints)
 """
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
+path = './Fang_Camera_Calibration_Params'
+isExist = os.path.exists(path)
+
+if not isExist:
+  
+  # Create a new directory because it does not exist 
+  os.makedirs(path)
+
+
 print("Camera matrix : \n")
 print(mtx)
+print("Saving camera matrix to file \n")
+np.save(f"{path}/fang_intrinsic_camera_matrix", mtx)
 print("dist : \n")
+print("Saving distortion coeffs to file \n")
 print(dist)
-print("rvecs : \n")
-print(rvecs)
-print("tvecs : \n")
-print(tvecs)
+np.save(f"{path}/fang_camera_distortion_coeffs", dist)
+# print(dist)
+
+# print("rvecs : \n")
+# print(rvecs)
+# print("tvecs : \n")
+# print(tvecs)
