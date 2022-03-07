@@ -56,6 +56,7 @@ def arucoDetect(frame):
     # Check that at least one ArUco marker was detected
 
     if ROBOT_BASE_MARKER_ID and CUP_MARKER_ID in markerIDs:
+        
         try:
             base_marker_idx = int(np.where(markerIDs == ROBOT_BASE_MARKER_ID)[0][0])
             cup_marker_idx = int(np.where(markerIDs == CUP_MARKER_ID)[0][0])
@@ -74,11 +75,16 @@ def arucoDetect(frame):
             cup_rotMat = np.zeros(3)
             R, _  = cv2.Rodrigues(base_rvec)
             #print(R)
-            print(f"cup distance from base: {cup_tvec - base_tvec}")
+
+            cup2base_distance = cup_tvec - base_tvec
+            print(f"cup distance from base: {cup2base_distance}")
+            return cup2base_distance[0][0]
 
         except IndexError:
+
+            print("no cup detected")
             
-            pass 
+             
 
     if len(corners) > 0:
 
