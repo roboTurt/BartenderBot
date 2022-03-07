@@ -78,7 +78,7 @@ def arucoDetect(frame):
 
             cup2base_distance = cup_tvec - base_tvec
             print(f"cup distance from base: {cup2base_distance}")
-            return cup2base_distance[0][0]
+            #return cup2base_distance[0][0]
 
         except IndexError:
 
@@ -101,7 +101,7 @@ def arucoDetect(frame):
             # Draw Axis
             cv2.aruco.drawAxis(frame, camera_intrinsic_matrix, distortion_coeffs, rvec, tvec, 0.01)
 
-    return frame 
+    return frame, cup2base_distance
 
 
 if __name__ == '__main__':
@@ -115,7 +115,7 @@ if __name__ == '__main__':
         if img is not None:
             frame = img.copy()
             undistorted_frame = undistortFrame(frame)
-            frame = arucoDetect(undistorted_frame)
+            frame, _ = arucoDetect(undistorted_frame)
             cv2.imshow('Frame', frame)
             key = cv2.waitKey(1)
             if key == 27:
