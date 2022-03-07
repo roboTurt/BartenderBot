@@ -17,6 +17,10 @@ distortion_coeffs_file_path = root+"/CameraCalibration/Fang_Camera_Calibration_P
 camera_intrinsic_matrix = np.load(camera_mtx_file_path)
 distortion_coeffs = np.load(distortion_coeffs_file_path)
 
+MARKER_WIDTH = 0.04275 #units in meters
+ROBOT_BASE_MARKER_ID = 2 
+CUP_MARKER_ID = 4
+
 def undistortFrame(frame_image):
 
     h,  w = frame_image.shape[:2]
@@ -40,17 +44,51 @@ def arucoDetect(frame):
     parameters =  cv2.aruco.DetectorParameters_create()
 
     # Detect the markers in the image
-    corners, markerIds, rejectedCandidates = cv2.aruco.detectMarkers(frame, dictionary, parameters=parameters, 
+    corners, markerIDs, rejectedCandidates = cv2.aruco.detectMarkers(frame, dictionary, parameters=parameters, 
                                                                            cameraMatrix = camera_intrinsic_matrix, 
                                                                            distCoeff = distortion_coeffs)
+    #markerIDs get sorted in decreasing order 
+    #grab array indices 
+    # base_marker_idx = int(np.where(markerIDs == ROBOT_BASE_MARKER_ID)[0][0])
+    # cup_marker_idx = int(np.where(markerIDs == CUP_MARKER_ID)[0][0])
 
+    # print(base_marker_idx, cup_marker_idx)
     # Check that at least one ArUco marker was detected
+
+    if ROBOT_BASE_MARKER_ID and CUP_MARKER_ID in markerIDs:
+        try:
+            base_marker_idx = int(np.where(markerIDs == ROBOT_BASE_MARKER_ID)[0][0])
+            cup_marker_idx = int(np.where(markerIDs == CUP_MARKER_ID)[0][0])
+
+            print(base_marker_idx, cup_marker_idx)
+
+            base_rvec, base_tvec, base_markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[base_marker_idx], MARKER_WIDTH, camera_intrinsic_matrix,
+                                                                        distortion_coeffs)
+            cup_rvec, cup_tvec, cup_markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[cup_marker_idx], MARKER_WIDTH, camera_intrinsic_matrix,
+                                                                        distortion_coeffs)
+            
+            print(f"base_tvec: {base_tvec}")
+            print(" ")
+            print(f"cup_tvec: {cup_tvec}")
+
+            cup_rotMat = np.zeros(3)
+            R, _  = cv2.Rodrigues(base_rvec)
+            #print(R)
+            print(f"cup distance from base: {cup_tvec - base_tvec}")
+
+        except IndexError:
+            
+            pass 
+
     if len(corners) > 0:
 
-        for i in range(0, len(markerIds)):
+        for i in range(0, len(markerIDs)):
             # Estimate pose of each marker and return the values rvec and tvec---(different from those of camera coefficients)
-            rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], 0.02, camera_intrinsic_matrix,
+            
+            rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], MARKER_WIDTH, camera_intrinsic_matrix,
                                                                        distortion_coeffs)
+            
+            #print(f"marker ID {markerIDs[i]} translation vector : {tvec}")
             # Draw a square around the markers
             cv2.aruco.drawDetectedMarkers(frame, corners) 
 
@@ -58,30 +96,6 @@ def arucoDetect(frame):
             cv2.aruco.drawAxis(frame, camera_intrinsic_matrix, distortion_coeffs, rvec, tvec, 0.01)
 
     return frame 
-    #cv2.aruco.drawDetectedMarkers(img, markerCorners) 
-   # print(markerCorners)
-
-# ARUCO_DICT = {
-#   "DICT_4X4_50": cv2.aruco.DICT_4X4_50,
-#   "DICT_4X4_100": cv2.aruco.DICT_4X4_100,
-#   "DICT_4X4_250": cv2.aruco.DICT_4X4_250,
-#   "DICT_4X4_1000": cv2.aruco.DICT_4X4_1000,
-#   "DICT_5X5_50": cv2.aruco.DICT_5X5_50,
-#   "DICT_5X5_100": cv2.aruco.DICT_5X5_100,
-#   "DICT_5X5_250": cv2.aruco.DICT_5X5_250,
-#   "DICT_5X5_1000": cv2.aruco.DICT_5X5_1000,
-#   "DICT_6X6_50": cv2.aruco.DICT_6X6_50,
-#   "DICT_6X6_100": cv2.aruco.DICT_6X6_100,
-#   "DICT_6X6_250": cv2.aruco.DICT_6X6_250,
-#   "DICT_6X6_1000": cv2.aruco.DICT_6X6_1000,
-#   "DICT_7X7_50": cv2.aruco.DICT_7X7_50,
-#   "DICT_7X7_100": cv2.aruco.DICT_7X7_100,
-#   "DICT_7X7_250": cv2.aruco.DICT_7X7_250,
-#   "DICT_7X7_1000": cv2.aruco.DICT_7X7_1000,
-#   "DICT_ARUCO_ORIGINAL": cv2.aruco.DICT_ARUCO_ORIGINAL
-# }
-
-
 
 
 if __name__ == '__main__':
