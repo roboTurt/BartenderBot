@@ -74,6 +74,8 @@ def arucoDetect(frame):
             print(" ")
             print(f"cup_tvec: {cup_tvec}")
 
+            # Calculate rotation matrix of cup from base.
+            # If we don't need it, comment it out.
             cup_R,_ = cv2.Rodrigues(cup_rvec)
             base_R, _  = cv2.Rodrigues(base_rvec)
             cup_R = np.matrix(cup_R)
