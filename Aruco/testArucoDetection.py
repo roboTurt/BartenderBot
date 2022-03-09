@@ -1,5 +1,6 @@
 import sys,os
-root = os.path.dirname(os.getcwd())
+root = os.path.dirname(os.path.realpath(__file__))
+root = os.path.abspath(os.path.join(root,os.pardir))
 sys.path.append(root)
 import cv2
 import time
@@ -9,9 +10,9 @@ import numpy as np
 
 #load camera calibration parameters 
 
-camera_mtx_file_path = root+"/CameraCalibration/Fang_Camera_Calibration_Params/fang_intrinsic_camera_matrix.npy"
+camera_mtx_file_path = root+"/CameraCalibration/Camera_Calibration_Params/intrinsic_camera_matrix.npy"
 
-distortion_coeffs_file_path = root+"/CameraCalibration/Fang_Camera_Calibration_Params/fang_camera_distortion_coeffs.npy"
+distortion_coeffs_file_path = root+"/CameraCalibration/Camera_Calibration_Params/camera_distortion_coeffs.npy"
 
 
 camera_intrinsic_matrix = np.load(camera_mtx_file_path)
@@ -55,7 +56,7 @@ def arucoDetect(frame):
     # print(base_marker_idx, cup_marker_idx)
     # Check that at least one ArUco marker was detected
 
-    if ROBOT_BASE_MARKER_ID and CUP_MARKER_ID in markerIDs:
+    if (markerIDs is not None) and (ROBOT_BASE_MARKER_ID and CUP_MARKER_ID in markerIDs):
         
         try:
             base_marker_idx = int(np.where(markerIDs == ROBOT_BASE_MARKER_ID)[0][0])
@@ -83,6 +84,10 @@ def arucoDetect(frame):
         except IndexError:
 
             print("no cup detected")
+            cup2base_distance = 0
+    else:
+        print("No arm detected")
+        cup2base_distance = 0
             
              
 
