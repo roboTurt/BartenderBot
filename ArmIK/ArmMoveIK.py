@@ -82,7 +82,7 @@ class ArmIK:
 
         return movetime
 
-    def setPitchRange(self, coordinate_data, alpha1, alpha2, da = 1):
+    def setPitchRange(self, coordinate_data, alpha1, alpha2, da = 0.1):
         #给定坐标coordinate_data和俯仰角的范围alpha1，alpha2, 自动在范围内寻找到的合适的解
         #如果无解返回False,否则返回对应舵机角度,俯仰角
         #坐标单位cm， 以元组形式传入，例如(0, 5, 10)

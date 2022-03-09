@@ -29,12 +29,11 @@ if __name__ == '__main__':
     # start()
     __target_color = ('red', )
     my_camera = Camera.Camera()
-    my_camera.camera_open()
+    #my_camera.camera_open()
 
     done = False # arm state variable to end program
     id_blocks = Perception(__target_color) # 
     arm_IK = MoveArm()
-
 
     #Create RossROS busses
     while my_camera.frame is None:

@@ -1,9 +1,11 @@
-
-
+import sys,os
+root = os.path.dirname(os.path.realpath(__file__))
+root = os.path.abspath(os.path.join(root,os.pardir))
+sys.path.append(root)
 from tkinter import Y
 import cv2
 import time
-import Camera
+#import Camera
 import threading
 from LABConfig import *
 from ArmIK.Transform import *
@@ -16,7 +18,8 @@ class MoveArm():
 
     def __init__(self) -> None:
         
-        self.gripperAngle_closed = 500    
+        self.gripperAngle_closed = 265
+        self.gripperAngle_open = 0     
         self.last_target_world_X = None
         self.last_target_world_Y = None
         self.detected_color = None 
@@ -86,12 +89,12 @@ class MoveArm():
 
     def closeGripper(self):
 
-        Board.setBusServoPulse(1, self.gripperAngle_closed, 500)
+        Board.setBusServoPulse(1, self.gripperAngle_open + self.gripperAngle_closed, 500)
  
     
     def openGripper(self):
 
-        Board.setBusServoPulse(1, self.gripperAngle_closed - 280, 500)  # 爪子张开 #open gripper 
+        Board.setBusServoPulse(1, 0, 500)  # 爪子张开 #open gripper 
 
     
     def adjust_endEffector_Z_height(self, target_Z_height):
@@ -102,69 +105,55 @@ class MoveArm():
             
                                     -90, -90, 0, 1000)
    
-    def pickAndPlace(self, targetX, targetY, orientationAngle, color):
+    def pickUpCan(self):
+        #get ready to pick up can 
+        targetX = 23
+        targetY = 0
+        Board.setBusServoPulse(2, 500, 2000)
+        self.openGripper()
+        self.AK.setPitchRangeMoving( (targetX, targetY, 12), 
         
-        #print(len(processedImage))
-
-        # targetX = processedImage[2]
-        # targetY = processedImage[3]
-        # orientationAngle = processedImage[4]
-        # color = processedImage[1]
+                                10, 15, 0, 3000)
+        targetX = 25
+        time.sleep(3)
+        self.AK.setPitchRangeMoving( (targetX, targetY, 12), 
         
-        if color is "None":
-            
-            self.initMove()
+                                5, 15, 0, 3000)
+       
+        self.closeGripper()
+
+        time.sleep(3)
+        #move to pour position
+        targetX = 0
+        targetY = 26
+        self.AK.setPitchRangeMoving( (targetX, targetY, 12), 
         
-        # print(orientationAngle)
-        # print(color)
-
-        else:
-
-            previous_target_coords = [self.last_target_world_X, self.last_target_world_Y]
-            current_target_coords = [targetX, targetY]
-
-            # if None not in previous_target_coords:
-            #     previous_target_coords = [round(num, 1) for num in previous_target_coords]
-            if None not in current_target_coords:
-                current_target_coords = [round(num, 1) for num in current_target_coords]
-
-                print(targetX)
-                print(" ")
-                print(targetY)
-                self.capture_block_location_and_color(targetX, targetY, color)
-                self.openGripper()
-                
-                result = self.move_endEffector_to_target(targetX, targetY)
-                #print(result)
-                if result is not False:
-
-                    target_orient_angle = self.match_endEffector_angle_to_block(targetX, targetY, orientationAngle)
-                    time.sleep(0.2)
-                    self.rotate_endEffector_by_angle(target_orient_angle)
-                    time.sleep(0.2)
-                    self.adjust_endEffector_Z_height(1.5) #lower claw to block 
-                    time.sleep(0.2)
-                    self.closeGripper()
-                    time.sleep(0.2)
-                    self.adjust_endEffector_Z_height(12) #raise claw 
-                    time.sleep(0.2)
-                    target_home_position_X = self.coordinate[color][0]
-                    target_home_position_Y = self.coordinate[color][1]
-                    self.move_endEffector_to_target(target_home_position_X, target_home_position_Y)
-                    time.sleep(2.2)
-                    self.adjust_endEffector_Z_height(1.5) #lower claw to block 
-                    time.sleep(0.2)
-                    self.openGripper()
-                    time.sleep(0.2)
-            
-                else:
-                    self.initMove()
-                    time.sleep(5)
-
-                    #time.sleep(2)
-
+                                5, 15, 0, 3000) 
+        time.sleep(3)
+        #pour
+        Board.setBusServoPulse(2, 800, 3000)
+        time.sleep(3)
+        #extend and move down
+        targetX = 0
+        targetY = 34
+        self.AK.setPitchRangeMoving( (targetX, targetY, 5), 
         
+                                5, 15, 0, 3000)  
+        time.sleep(3)
 
+        #retract and move up
+        targetX = 0
+        targetY = 24
+        self.AK.setPitchRangeMoving( (targetX, targetY, 15), 
+        
+                                5, 15, 0, 3000)  
+        time.sleep(3)
+if __name__ == '__main__':
+
+    arm_IK = MoveArm()
+    arm_IK.initMove()
+    while True:
+        arm_IK.pickUpCan()
             
 
 

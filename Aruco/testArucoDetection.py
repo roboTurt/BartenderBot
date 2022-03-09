@@ -1,6 +1,7 @@
 import sys,os
 root = os.path.dirname(os.path.realpath(__file__))
 root = os.path.abspath(os.path.join(root,os.pardir))
+print(root)
 sys.path.append(root)
 import cv2
 import time
@@ -8,33 +9,24 @@ import Camera
 import threading
 import numpy as np
 from scipy.spatial.transform import Rotation as R
+from CameraCalibration.CalibrationConfig import *
 
 #load camera calibration parameters 
 
-camera_mtx_file_path = root+"/CameraCalibration/Camera_Calibration_Params/intrinsic_camera_matrix.npy"
+#camera_mtx_file_path = root+"/CameraCalibration/Camera_Calibration_Params/intrinsic_camera_matrix.npy"
 
-distortion_coeffs_file_path = root+"/CameraCalibration/Camera_Calibration_Params/camera_distortion_coeffs.npy"
+#distortion_coeffs_file_path = root+"/CameraCalibration/Camera_Calibration_Params/camera_distortion_coeffs.npy"
 
+# camera_intrinsic_matrix = np.load(camera_mtx_file_path)
+# distortion_coeffs = np.load(distortion_coeffs_file_path)
+try:
+    camera_intrinsic_matrix = np.load(calibration_param_path + 'intrinsic_camera_matrix.npy')
+    distortion_coeffs = np.load(calibration_param_path + 'camera_distortion_coeffs.npy')
 
-camera_intrinsic_matrix = np.load(camera_mtx_file_path)
-distortion_coeffs = np.load(distortion_coeffs_file_path)
+except AttributeError:
 
-MARKER_WIDTH = 0.04275 #units in meters
-ROBOT_BASE_MARKER_ID = 2 
-CUP_MARKER_ID = 4
+    print("camera calibration parameters not found")
 
-def undistortFrame(frame_image):
-
-    h,  w = frame_image.shape[:2]
-    newcameramtx, roi = cv2.getOptimalNewCameraMatrix(camera_intrinsic_matrix, distortion_coeffs, (w,h), 1, (w,h))
-
-    dst = cv2.undistort(frame_image, camera_intrinsic_matrix, distortion_coeffs, None, newcameramtx)
-    # crop the image
-    #x, y, w, h = roi
-    #dst = dst[y:y+h, x:x+w]
-    
-    return dst
-    #cv2.imwrite('calibresult.png', dst)
 
 
 def arucoDetect(frame):
@@ -51,11 +43,9 @@ def arucoDetect(frame):
                                                                            distCoeff = distortion_coeffs)
     #markerIDs get sorted in decreasing order 
     #grab array indices 
-    # base_marker_idx = int(np.where(markerIDs == ROBOT_BASE_MARKER_ID)[0][0])
-    # cup_marker_idx = int(np.where(markerIDs == CUP_MARKER_ID)[0][0])
 
-    # print(base_marker_idx, cup_marker_idx)
     # Check that at least one ArUco marker was detected
+    detection_successful = False 
 
     if (markerIDs is not None) and (ROBOT_BASE_MARKER_ID and CUP_MARKER_ID in markerIDs):
         
@@ -82,19 +72,17 @@ def arucoDetect(frame):
             print(f"cup euler ZYZ from base: {rel_R.as_euler('zyz', degrees=True)}")
 
             cup2base_distance = cup_tvec - base_tvec
+            detection_successful = True 
             print(f"cup distance from base: {cup2base_distance}")
-            #return cup2base_distance[0][0]
 
         except IndexError:
 
             print("no cup detected")
             cup2base_distance = 0
     else:
-        print("No arm detected")
+        print("No markers detected")
         cup2base_distance = 0
             
-             
-
     if len(corners) > 0:
 
         for i in range(0, len(markerIDs)):
@@ -110,22 +98,21 @@ def arucoDetect(frame):
             # Draw Axis
             cv2.aruco.drawAxis(frame, camera_intrinsic_matrix, distortion_coeffs, rvec, tvec, 0.01)
 
-    return frame, cup2base_distance
+    return frame, detection_successful, cup2base_distance
 
 
 if __name__ == '__main__':
 
     my_camera = Camera.Camera()
-    my_camera.camera_open()
+    #my_camera.camera_open()
     
     while True:
         
-        img = my_camera.frame
+        img = my_camera.get_undistorted_frame()
         if img is not None:
-            frame = img.copy()
-            undistorted_frame = undistortFrame(frame)
-            frame, _ = arucoDetect(undistorted_frame)
-            cv2.imshow('Frame', frame)
+            undistorted_frame = my_camera.get_undistorted_frame()
+            processed_frame,_,_ = arucoDetect(undistorted_frame)
+            cv2.imshow('Frame', processed_frame)
             key = cv2.waitKey(1)
             if key == 27:
                 break

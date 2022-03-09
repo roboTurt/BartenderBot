@@ -13,30 +13,41 @@ if sys.version_info.major == 2:
     sys.exit(0)
 
 class Camera:
-    def __init__(self, resolution=(640, 480)):
+
+    def __init__(self, resolution=(1280, 720)):
         self.cap = None
-        self.width = resolution[0]
-        self.height = resolution[1]
-        self.frame = None
         self.opened = False
+        self.width = 0
+        self.height = 0
+        self.camera_open()
+        _, self.raw_frame = self.cap.read()
+        #self.width, self.height = self.raw_frame.shape[:2]
+        #self.height = resolution[1]
+        self.frame = self.raw_frame
         #加载参数
-        self.param_data = np.load(calibration_param_path + '.npz')
+        #self.camera_calibration = np.load(calibration_param_path + '.npz')
         
         #获取参数
-        self.mtx = self.param_data['mtx_array']
-        self.dist = self.param_data['dist_array']
-        self.newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.mtx, self.dist, (self.width, self.height), 0, (self.width, self.height))
-        self.mapx, self.mapy = cv2.initUndistortRectifyMap(self.mtx, self.dist, None, self.newcameramtx, (self.width,self.height), 5)
+        self.camera_intrinsic_matrix = np.load(calibration_param_path + 'intrinsic_camera_matrix.npy')
+        self.distortion_coeffs = np.load(calibration_param_path + 'camera_distortion_coeffs.npy')
         
-        self.th = threading.Thread(target=self.camera_task, args=(), daemon=True)
-        self.th.start()
+        self.newcameramtx, roi = cv2.getOptimalNewCameraMatrix(self.camera_intrinsic_matrix, self.distortion_coeffs, (self.width, self.height), 0, (self.width, self.height))
+        
+        self.mapx, self.mapy = cv2.initUndistortRectifyMap(self.camera_intrinsic_matrix, self.distortion_coeffs, None, self.newcameramtx, (self.width,self.height), cv2.CV_32FC1)
+        
+        #self.th = threading.Thread(target=self.camera_task, args=(), daemon=True)
+        #self.th.start()
 
     def camera_open(self):
         try:
-            self.cap = cv2.VideoCapture(-1)
+            self.cap = cv2.VideoCapture(0)
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('Y', 'U', 'Y', 'V'))
             self.cap.set(cv2.CAP_PROP_FPS, 30)
             self.cap.set(cv2.CAP_PROP_SATURATION, 40)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
+            self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.opened = True
         except Exception as e:
             print('打开摄像头失败:', e)
@@ -54,7 +65,26 @@ class Camera:
 
     def get_camera_frame(self):
         #print("frame")
-        return self.frame
+        return self.raw_frame
+
+    def get_undistorted_frame(self):
+
+        try:
+            if self.opened and self.cap.isOpened():
+                ret, frame_tmp = self.cap.read()
+                if ret:
+                    frame_resize = cv2.resize(frame_tmp, (self.width, self.height), interpolation=cv2.INTER_NEAREST)
+                    undistorted_frame = cv2.remap(frame_resize, self.mapx, self.mapy, cv2.INTER_LINEAR)
+                    return undistorted_frame
+                else:
+                    
+                    return None 
+            else:
+                return None 
+        
+        except Exception as e:
+            print('error in reading camera frame', e)
+            time.sleep(0.01)
 
     def camera_task(self):
         while True:
