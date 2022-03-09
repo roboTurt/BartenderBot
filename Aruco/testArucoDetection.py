@@ -7,6 +7,7 @@ import time
 import Camera
 import threading
 import numpy as np
+from scipy.spatial.transform import Rotation as R
 
 #load camera calibration parameters 
 
@@ -73,9 +74,12 @@ def arucoDetect(frame):
             print(" ")
             print(f"cup_tvec: {cup_tvec}")
 
-            cup_rotMat = np.zeros(3)
-            R, _  = cv2.Rodrigues(base_rvec)
-            #print(R)
+            cup_R,_ = cv2.Rodrigues(cup_rvec)
+            base_R, _  = cv2.Rodrigues(base_rvec)
+            cup_R = np.matrix(cup_R)
+            base_R = np.matrix(base_R)
+            rel_R = R.from_matrix(np.linalg.inv(base_R)*cup_R)
+            print(f"cup euler ZYZ from base: {rel_R.as_euler('zyz', degrees=True)}")
 
             cup2base_distance = cup_tvec - base_tvec
             print(f"cup distance from base: {cup2base_distance}")
