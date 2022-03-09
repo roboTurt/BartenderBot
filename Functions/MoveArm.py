@@ -118,7 +118,7 @@ class MoveArm():
         time.sleep(3)
         self.AK.setPitchRangeMoving( (targetX, targetY, 12), 
         
-                                5, 15, 0, 3000)
+                                5, 15, 0,1000)
        
         self.closeGripper()
 
@@ -131,14 +131,14 @@ class MoveArm():
                                 5, 15, 0, 3000) 
         time.sleep(3)
         #pour
-        Board.setBusServoPulse(2, 800, 3000)
+        Board.setBusServoPulse(2, 800,1000)
         time.sleep(3)
         #extend and move down
         targetX = 0
         targetY = 34
         self.AK.setPitchRangeMoving( (targetX, targetY, 5), 
         
-                                5, 15, 0, 3000)  
+                                5, 15,0,1000)  
         time.sleep(3)
 
         #retract and move up
@@ -146,7 +146,7 @@ class MoveArm():
         targetY = 24
         self.AK.setPitchRangeMoving( (targetX, targetY, 15), 
         
-                                5, 15, 0, 3000)  
+                                5, 15, 0,1000)  
         time.sleep(3)
 if __name__ == '__main__':
 
