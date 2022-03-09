@@ -7,11 +7,15 @@ square_length = 3
 #标定棋盘大小, 列， 行, 指内角点个数，非棋盘格
 calibration_size = (7, 7)
 
+root_path = '/home/pi/Armpi'
+
+calibration_path = root_path + '/CameraCalibration'
+
 #采集标定图像存储路径
-save_path = '/home/pi/ArmPi/CameraCalibration/calibration_images/'
+save_path = calibration_path + '/calibration_images'
 
 #标定参数存储路径
-calibration_param_path = '/home/pi/ArmPi/CameraCalibration/calibration_param'
+calibration_param_path = calibration_path + '/calibration_param'
 
 #映射参数存储路径
-map_param_path = '/home/pi/ArmPi/CameraCalibration/map_param'
+map_param_path = calibration_path + '/map_param'

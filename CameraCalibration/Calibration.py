@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import os
 import glob
+from CalibrationConfig import *
 
 # Defining the dimensions of checkerboard
 CHECKERBOARD = (9,6)
@@ -20,7 +21,7 @@ objp[0,:,:2] = np.mgrid[0:CHECKERBOARD[0], 0:CHECKERBOARD[1]].T.reshape(-1, 2)
 prev_img_shape = None
 
 # Extracting path of individual image stored in a given directory
-images = glob.glob('./calibration_images/fang_calibration_images/*.jpg')
+images = glob.glob(save_path + '/*.jpg')
 for fname in images:
     img = cv2.imread(fname)
     gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -58,23 +59,23 @@ detected corners (imgpoints)
 """
 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
 
-path = './Fang_Camera_Calibration_Params'
-isExist = os.path.exists(path)
+param_path = root_path + '/Camera_Calibration_Params'
+isExist = os.path.exists(param_path)
 
 if not isExist:
   
   # Create a new directory because it does not exist 
-  os.makedirs(path)
+  os.makedirs(param_path)
 
 
 print("Camera matrix : \n")
 print(mtx)
 print("Saving camera matrix to file \n")
-np.save(f"{path}/fang_intrinsic_camera_matrix", mtx)
+np.save(f"{param_path}/intrinsic_camera_matrix", mtx)
 print("dist : \n")
 print("Saving distortion coeffs to file \n")
 print(dist)
-np.save(f"{path}/fang_camera_distortion_coeffs", dist)
+np.save(f"{param_path}/camera_distortion_coeffs", dist)
 # print(dist)
 
 # print("rvecs : \n")
