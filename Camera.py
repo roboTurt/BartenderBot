@@ -14,7 +14,7 @@ if sys.version_info.major == 2:
 
 class Camera:
 
-    def __init__(self, resolution=(1280, 720)):
+    def __init__(self, resolution=(640, 360)):
         self.cap = None
         self.opened = False
         self.width = 0
@@ -44,8 +44,8 @@ class Camera:
             self.cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('Y', 'U', 'Y', 'V'))
             self.cap.set(cv2.CAP_PROP_FPS, 30)
             self.cap.set(cv2.CAP_PROP_SATURATION, 40)
-            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 720)
-            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 360)
+            self.cap.set(cv2.CAP_PROP_FRAME_WIDTH, 600)
+            self.cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 300)
             self.width = int(self.cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             self.height = int(self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.opened = True

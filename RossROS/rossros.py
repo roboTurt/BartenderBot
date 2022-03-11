@@ -7,9 +7,8 @@ from logdecorator import log_on_start, log_on_end, log_on_error
 
 DEBUG = logging.DEBUG
 logging_format = "%(asctime)s: %(message)s"
-logging.basicConfig(format=logging_format, level=logging.INFO,
+logging.basicConfig(format=logging_format, level=logging.DEBUG,
                     datefmt="%H:%M:%S")
-
 
 class Bus:
     """
@@ -99,24 +98,28 @@ class ConsumerProducer:
     @log_on_end(DEBUG, "{self.name:s}: Closing down consumer-producer service")
     def __call__(self):
 
-        while True:
+        import traceback
+        try:
+            while True:
 
-            # Check if the loop should terminate
-            # termination_value = self.termination_busses[0].get_message(self.name)
-            if self.checkTerminationBusses():
-                break
+                # Check if the loop should terminate
+                # termination_value = self.termination_busses[0].get_message(self.name)
+                if self.checkTerminationBusses():
+                    break
 
-            # Collect all of the values from the input busses into a list
-            input_values = self.collectBussesToValues(self.input_busses)
+                # Collect all of the values from the input busses into a list
+                input_values = self.collectBussesToValues(self.input_busses)
 
-            # Get the output value or tuple of values corresponding to the inputs
-            output_values = self.consumer_producer_function(*input_values)
+                # Get the output value or tuple of values corresponding to the inputs
+                output_values = self.consumer_producer_function(*input_values)
 
-            # Deal the values into the output busses
-            self.dealValuesToBusses(output_values, self.output_busses)
+                # Deal the values into the output busses
+                self.dealValuesToBusses(output_values, self.output_busses)
 
-            # Pause for set amount of time
-            time.sleep(self.delay)
+                # Pause for set amount of time
+                time.sleep(self.delay)
+        except:
+            traceback.print_exc()
 
     # Take in a bus or a tuple of busses, and store their
     # messages into a list

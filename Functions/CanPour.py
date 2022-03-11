@@ -7,7 +7,8 @@ from cv2 import undistort
 
 sys.path.append(os.path.dirname(os.getcwd()))
 
-from MoveArm import MoveArm
+#from MoveArm import MoveArm
+from Motion import Motion
 import cv2
 import time
 import Camera
@@ -30,14 +31,11 @@ if __name__ == '__main__':
 
     done = False # arm state variable to end program
     aruco_perception = Perception() # 
-    arm_IK = MoveArm()
+    arm_ik = Motion()
 
     #Create RossROS busses
     #     
-    raw_camera_frame_bus = Bus(name = "undistorted frame")
-    post_detection_frame_bus = Bus(name = "undistorted frame")
-    detection_status_bus = Bus(name = "undistorted frame")
-    cup2base_distance_bus = Bus(name = "undistorted frame")
+    perception_bus = Bus(name = "undistorted frame")
 
     termination_bus = Bus(name = "termination bus")
 
@@ -46,27 +44,20 @@ if __name__ == '__main__':
                   delay = 1, name = "termination timer") 
 
     #Creating perception RossROS services 
-
-    camera_feed_service = Producer(aruco_perception.getRawCameraFrame, 
-                                   output_busses = raw_camera_frame_bus,
-                                   delay = 0.2,
-                                   termination_busses = termination_bus,
-                                   name = "raw camera images")
-
-
-    perception_service = ConsumerProducer(aruco_perception.arucoDetect, 
-                                          input_busses = raw_camera_frame_bus,
-                                          output_busses = (post_detection_frame_bus,
-                                                           detection_status_bus,
-                                                           cup2base_distance_bus),
-                                          delay = 0.1,
-                                          termination_busses = termination_bus,
-                                          name = "detect aruco markers")
+    perception_service = Producer(aruco_perception.aruco_detect, 
+                                  output_busses = perception_bus,
+                                  delay = 0.2,
+                                  termination_busses = termination_bus,
+                                  name = "detect aruco markers")
 
 
-    list_of_concurrent_services  = [camera_feed_service.__call__, 
-                                    perception_service.__call__,
-                                    ]
+    roboarm_service = Consumer(arm_ik.step,
+                               input_busses = perception_bus,
+                               delay=0.1,
+                               termination_busses = termination_bus,
+                               name = 'control robo arm')
+    list_of_concurrent_services  = [perception_service,
+                                    roboarm_service]
 
     
     runConcurrently(list_of_concurrent_services)

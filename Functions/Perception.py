@@ -1,7 +1,6 @@
 import sys,os
 root = os.path.dirname(os.path.realpath(__file__))
 root = os.path.abspath(os.path.join(root,os.pardir))
-print(root)
 sys.path.append(root)
 import cv2
 import time
@@ -10,7 +9,7 @@ import threading
 import numpy as np
 from scipy.spatial.transform import Rotation as R
 from CameraCalibration.CalibrationConfig import *
-from RossROS import rossros 
+#from RossROS import rossros 
 
 
 # import cv2
@@ -31,28 +30,56 @@ class Perception():
     
         self.camera = Camera.Camera() 
 
-    def getRawCameraFrame(self):
-        
-        return self.camera.get_undistorted_frame()
-    
-    def arucoDetect(self,frame):
+    def aruco_detect(self):
+        frame = self.camera.get_undistorted_frame()
 
         #Load the dictionary that was used to generate the markers.
         dictionary = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
 
         # Initialize the detector parameters using default values
-        parameters =  cv2.aruco.DetectorParameters_create()
+        parameters = cv2.aruco.DetectorParameters_create()
 
         # Detect the markers in the image
         corners, markerIDs, rejectedCandidates = cv2.aruco.detectMarkers(frame, dictionary, parameters=parameters, 
                                                                             cameraMatrix = self.camera.camera_intrinsic_matrix, 
                                                                             distCoeff = self.camera.distortion_coeffs)
+        cv2.aruco.drawDetectedMarkers(frame, corners) 
         #markerIDs get sorted in decreasing order 
         #grab array indices 
 
         # Check that at least one ArUco marker was detected
         detection_successful = False 
+        markers = {}
 
+        conf = self.camera.camera_intrinsic_matrix, self.camera.distortion_coeffs
+        if markerIDs is not None:
+            # WARNING: Assumes no duplicate markers
+            for i, marker_id in enumerate(markerIDs):
+                rvec, tvec, points = cv2.aruco.estimatePoseSingleMarkers(corners[i], MARKER_WIDTH, *conf)
+                R, _ = cv2.Rodrigues(rvec)
+                R = np.matrix(R)
+                tvec = np.array(tvec).flatten()
+
+                # Draw Axis
+                cv2.aruco.drawAxis(frame, *conf, rvec, tvec, 0.01)
+
+                if marker_id == ROBOT_BASE_MARKER_ID:
+                    key = 'base'
+                elif marker_id == CUP_MARKER_ID:
+                    key = 'cup'
+                elif marker_id == CAN_MARKER_ID:
+                    key = 'can'
+                else:
+                    continue
+
+                #print(f"detected a {key} with pose {tvec}")
+                markers[key] = R, tvec
+                if 'base' in markers and 'can' in markers:
+                    #print("offset between base and can:")
+                    #print(markers['base'][1] - markers['can'][1])
+                    pass
+
+        """
         if (markerIDs is not None) and (ROBOT_BASE_MARKER_ID and CUP_MARKER_ID in markerIDs):
             
             try:
@@ -91,20 +118,17 @@ class Perception():
             print("No markers detected")
             cup2base_distance = 0
                 
-        if len(corners) > 0:
+        """
+        self.frame = frame
+        return markers
 
-            for i in range(0, len(markerIDs)):
-                # Estimate pose of each marker and return the values rvec and tvec---(different from those of camera coefficients)
-                
-                rvec, tvec, markerPoints = cv2.aruco.estimatePoseSingleMarkers(corners[i], MARKER_WIDTH, self.camera.camera_intrinsic_matrix,
-                                                                        self.camera.distortion_coeffs)
-                
-                #print(f"marker ID {markerIDs[i]} translation vector : {tvec}")
-                # Draw a square around the markers
-                cv2.aruco.drawDetectedMarkers(frame, corners) 
+if __name__ == '__main__':
+    aruco_perception = Perception() # 
 
-                # Draw Axis
-                cv2.aruco.drawAxis(frame, self.camera.camera_intrinsic_matrix, self.camera.distortion_coeffs, rvec, tvec, 0.01)
-
-        return frame, detection_successful, cup2base_distance
+    while True:
+        markers = aruco_perception.aruco_detect()
+        cv2.imshow('Frame', aruco_perception.frame)
+        key = cv2.waitKey(1)
+        if key == 27:
+            break
     
