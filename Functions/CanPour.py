@@ -46,14 +46,14 @@ if __name__ == '__main__':
     #Creating perception RossROS services 
     perception_service = Producer(aruco_perception.aruco_detect, 
                                   output_busses = perception_bus,
-                                  delay = 0.2,
+                                  delay = 0.05,
                                   termination_busses = termination_bus,
                                   name = "detect aruco markers")
 
 
     roboarm_service = Consumer(arm_ik.step,
                                input_busses = perception_bus,
-                               delay=0.1,
+                               delay=1.0,
                                termination_busses = termination_bus,
                                name = 'control robo arm')
     list_of_concurrent_services  = [perception_service,
