@@ -81,7 +81,7 @@ class Perception():
                     pass
 
             # Run observations through naive filter to get rid of any noise
-            alpha = 0.6
+            alpha = 0.8
             for k in markers:
                 if k not in self.markers:
                     self.markers[k] = markers[k]
